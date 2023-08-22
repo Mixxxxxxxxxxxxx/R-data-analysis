@@ -1,0 +1,643 @@
+---
+title: "Assignement_1_33059047"
+author: "Tamanna Das"
+date: "`r Sys.Date()`"
+output: html_document
+---
+# Introduction
+##### This report is based on the dataset National Waste report 2022 Australia provided by the department of Climate change, Energy the Environment and water in Australia. There are two datasets provided which are wastes.csv and Year_State_ID.csv containing the waste types, their categorization, the state and year in which they were analyzed, the ultimate destination of the waste,and the quantity of waste generated for the wstes dataset and in the year_state_id we have data of particular years and states.
+
+
+
+
+
+
+## Installing packages and library
+
+```{r}
+library(tidyverse)
+library(dplyr)
+
+```
+
+
+## Loading the two files and reading the data of the files that is - 
+### 1.Wastes.csv
+### 2.Year_State_Id.csv
+```{r}
+wastes<-read_csv("wastes.csv")
+Year_State_Id<-read_csv("Year_State_Id.csv")
+```
+
+## Question 1.
+### Reading the data wastes: We have already read the wastes data above here I am going to print the data to see how it looks.
+
+##### Code:
+```{r}
+print(wastes)
+```
+
+### Finding the number of columns and rows in the dataset:
+##### Code: 
+```{r}
+print(ncol(wastes))
+print(nrow(wastes))
+```
+##### Answer as seen above: The dataset contains 8 columns and 36717 rows as seen above
+
+##### Explanation: To arrive at this answer we used the function ncol and nrow which is used to find the number of columns and rows respectively in a dataset. 
+
+### Displaying the first 10 records and last 10 records of the dataset
+
+##### Code:
+
+```{r}
+first_10<-head(wastes,10)
+print(first_10)
+```
+##### Answer: The output of the first 10 records as seen above
+##### EXplanation: To arrive at the output I used the head function specifying the number of rows to be displayed showing the first 10 records.
+
+
+
+### last 10 records - 
+##### Code:
+```{r}
+last_10<-tail(wastes,10)
+print(last_10)
+```
+##### Answer: The ouput of the last 10 records as seen above
+##### Explanation: To arrive at the output I used the tail function specifying the number of rows to be displayed showing the last 10 records.
+
+
+
+
+## Question 2.
+### Finding unique "Type" values in the file -
+##### Code: 
+```{r}
+Type_values<-unique(wastes$Type)
+print(Type_values)
+
+```
+##### Answer: As we can see above there are 51 unique "Type" of waste materials in the dataset.The names of the unique "Type" of waste materials are aslo displayed above.
+
+##### Explanation: To find the unique Type values I chose the column "Type" because it refers to the detailed classification of waste material. And to achieve this I counted the unique values in the column type of the dataset using unique function and then I printed it out to see the unique type values.
+
+### Type values containing the keywords "chemicals" & "organics"
+##### Code:
+
+```{r}
+library(stringr)
+```
+
+##### Explanation for using stringr: str_count function is used to count the occurences of the word chemicals and Organics in the dataset
+
+##### Code: To find the no of occurences of the word chemicals and organics in the dataset
+
+```{r}
+##To avoid the error of getting reached getOption("max print")
+options(max.print = 30000) 
+
+x<-sum(str_count(wastes,"\\borganics\\b"),na.rm = TRUE)
+y<-sum(str_count(wastes,"\\bchemicals\\b"),na.rm = TRUE)
+print("No of occurences of the word organics is:")
+print(x)
+print("No of occurences of the word chemicals is:")
+print(y)
+
+
+
+
+```
+
+##### Answer: Can be seen above that is no of occurences of organcis and chemicals are : 3156 & 4416 respectively
+
+##### Explanation: I have used the str_count function to count the occurences and I have used the format "\\b the word to match\\b" as a method of regular expression to match chemicals and organics in the dataset where \\b is a word boundary anchor that matches the empty string at the beginning or end of a word.
+
+
+## Question 3.
+### finding the number of columns containing missing values and naming those
+##### code:
+```{r}
+colSums(is.na(wastes))
+```
+##### Answer: We can see above that there are two columns with missing values i.e. Tonnes and Core_Non-core
+
+##### Explanation:colSums is a function that calculates the sum of each column in our dataset and inside that I have used is.na to calculate the count of na values in each column 
+
+
+### Finding  the missingness percentage
+##### code: 
+```{r}
+colMeans(is.na(wastes))*100
+
+```
+
+##### Answer: Here we see that the missing percentage for Tonnes is 0.02995887% & for Core_Non-core is 0.03812948%.
+
+##### Explanation: is.na is used to create a logical expression to findout NA/missing values in the dataset and with colmeans to findout out means of each column of the logical expression. Multiplying it with 100 gives us the missingness %ages of Tonnes and Core_Non-core.
+
+
+## Question 4.
+### Finding no. of rows containing duplicates and printing them out
+##### Code: No of rows containing duplicates
+
+```{r}
+sum(duplicated(wastes))
+
+```
+##### Code: The duplicated rows are:
+```{r}
+duplicate_rows<-wastes[duplicated(wastes),]
+print(duplicate_rows)
+```
+
+
+
+##### Answer: In the above we can see that there are 3 rows in the dataset wastes that are duplicates of each other. Namely: the rows with case_ID as: 88850,88851 & 88852
+
+##### Explanation: Here I have used duplicated function to check for the rows that have duplicated values with sum function to see the number of duplicated rows and then have printed out the duplicated rows.
+
+
+
+### Removing dupliacted rows and creating a new dataframe
+##### Code:
+
+```{r}
+wastes_new <- wastes[!duplicated(wastes), ]
+wastes_new
+
+
+```
+
+##### Answer: I have removed the duplicates and created a new dataframe wastes_new
+
+##### Explanation: I have done this by simply applying a !mark to the function of duplicated(wastes) to remove the 3 rows that appeared in the duplicated(wastes) function.
+
+
+## Question 5.
+
+### Finding unique cases in the data file
+##### Code:
+```{r}
+nrow(wastes_new)
+
+
+```
+##### Answer: There are 36714 unique cases
+##### Explanation: Since we removed the duplicates in the above Q4. we have only the cases which are unique so we print the no of rows of the new dataframe wastes_new.
+
+
+### Finding the number of core and Non core cases
+
+##### Code:
+```{r}
+sum(str_count(wastes_new,"\\bCore\\b"),na.rm = TRUE)
+sum(str_count(wastes_new,"\\bNon-core\\b"),na.rm = TRUE)
+
+```
+
+##### Answer: The number of core cases are 36575 and the number of Non-core cases are 125
+
+##### Explanation: I have again used the str_count method and sum along with the regex expressions "\\bCore\\b" & "\\bNon-core\\b" to identify the cases and to not count missing values i have used na.rm = TRUE.
+
+
+## Question 6.
+### Finding the amount of tones of waste for different waste sources from various categories.
+### stream, category & Tones
+##### Code:
+
+```{r}
+wastes_new3<-wastes_new
+```
+```{r}
+table_frac_new<-wastes_new3 %>%
+  group_by(Category,Stream)%>%
+  summarise(total_tonnes = sum(Tonnes,na.rm=TRUE))%>%
+  mutate(frac = round(total_tonnes/sum(total_tonnes),4))
+```
+```{r}
+write.table(table_frac_new,"C:/Users/Tamanna Das/Desktop/table_frac.csv",sep=",",row.names=FALSE)
+```
+```{r}
+colSums(is.na(table_frac_new))
+```
+
+
+
+### Plotting frac vs category
+
+
+```{r}
+ggplot(data = table_frac_new,aes(x = Category, y = frac, fill = Stream)) + geom_bar(stat = "identity", position = "stack")+scale_x_discrete(guide=guide_axis(n.dodge=3)) +labs(title = "Fractions of waste tonnes of different categories", x = "Category", y = "Fraction of tonnes")+scale_fill_brewer(palette = "Set1")
+
+```
+
+
+
+
+
+
+
+
+##### Answer: I have drawn a chart showing the fraction value specific to the category. Here we can observe that Categories such as Ash and Biosolids have the highest percentage of fraction of wastes of C&I waste source, Building & demolition materials have the highest fraction of wastes for C&D waste source and Glass category have the highest waste fraction for MSW waste source.
+
+##### Explanation: First I created a dataset call table_frac_new there I grouped by Category and STream and then summarised for total tonnes after that I added a col named frac to find the total tonnes for that group divided by the sum of tonnes for all groups to calculate fraction.Post that I created a ggplot using geom_bar.
+
+
+
+## Question 7.
+### compute total tonnes for each Fate value, and then sort the total tonnes in a descending manner and display the data showing two columns (Fate and total tonnes).
+##### Code:
+
+
+```{r}
+fate<-aggregate(wastes_new$Tonnes, by=list(Fate = wastes_new$Fate), FUN = sum, na.rm = TRUE, na.action = NULL)
+
+```
+```{r}
+colnames(fate)[colnames(fate) == "x"] ="Total tonnes"
+```
+
+
+
+```{r}
+fate %>% arrange(desc(`Total tonnes`))
+
+```
+
+
+
+##### Answer: Displayed the columns fate and total_tonnes as seen above.The fate value showing the largest total tonnes is Recycling. 
+
+##### Explanation: I used the function aggregate to sum the tonnes by fate and I saved it in a table where I renmaed the sum of tonnes col by Total_tonnes and then I arranged it by descending order of total tonnes.
+
+
+
+
+## Question 8.
+### Write code to only keep data records that are about the Category of Organics, and then compute total tonnes against Type and Stream. Display the data and save them in a file named “wastes_organics_type_stream.csv”
+
+
+##### Code:
+
+```{r}
+Category_Organics<-wastes_new %>% 
+  filter(Category == "Organics")
+#print(Category_Organics)
+```
+```{r}
+wastes_organics_type_stream<-Category_Organics %>% group_by(Type,Stream) %>% 
+  summarise(sum =sum(Tonnes,na.rm = TRUE),
+            .groups = 'drop') %>%
+  as.data.frame()
+
+```
+
+```{r}
+print(wastes_organics_type_stream)
+```
+```{r}
+write.table(wastes_organics_type_stream,"C:/Users/Tamanna Das/Desktop/wastes_organics_type_stream.csv",sep=",",row.names=FALSE)
+```
+### Draw a chart to show the total tonnes of different Type and Stream values in “wastes_organics_type_stream.csv”
+##### Code:
+```{r}
+options(scipen = 999)
+ggplot(wastes_organics_type_stream, aes(x = Type,y = sum, fill = Stream, group = 1 ))+
+  geom_col()+geom_text(aes(label = scales::comma(sum)), 
+            position = position_stack(vjust = 0.5), 
+            size = 3, color = "white")+
+  theme_bw()+labs(x="Type",y="Total tonnes",title = "Total tonnes of different type and stream values")
+```
+
+
+
+#####  Answer: Here we can observe that C&D stream has the highest waste tonnes for Timber type waste, C&I stream has highest waste tonnes for timber type waste and MSW stream has highest waste in the type food organics.
+
+#####  Explanation: I have used filter first to filter out the category of Organics then I have used group by type and stream and summarised total tonnes and then I have written that data to csv. Post that I plotted a stacked column plot by color - stream and x axis as Type values while Y axis as total tonnes.
+
+
+## Question 9.
+### Write code to add two new columns named “year” and “State” and fill it with corresponding values, which can be retrieved from the file Year_State_ID.csv. Display the first 10 data records of the updated data.
+##### Code:
+
+```{r}
+merged_data<-wastes_new%>%
+  inner_join(Year_State_Id, by=c('Year_State_ID'='ID')
+    
+  )
+```
+
+```{r}
+head(merged_data,10)
+```
+##### Answer: Displaying the first 10 records of the merged data as seen above
+##### Explanation: In the above code I have first merged the data sets waste_new_final with Year_State_id by the common column name in both data sets namely year_state_id in wastes_new_final and ID in Year_State_Id.And then I displayed the first 10 records using head function.
+
+
+
+
+## Question 10.
+### Write code to display the statistical information, i.e., Min, Max, and Mean, of waste tonnes for each state.
+##### Code:
+
+```{r}
+options(scipen = 999)
+summary_stats<-merged_data%>%
+  group_by(State)%>%
+  summarise(min_Tonnes = min(Tonnes,na.rm = TRUE), max_Tonnes = max(Tonnes,na.rm = TRUE), mean_Tonnes = mean(Tonnes,na.rm = TRUE))
+```
+```{r}
+summary_stats%>%slice_max(summary_stats$mean_Tonnes)
+```
+### Which state has the largest Mean value of waste tonnes?
+##### Answer: NSW has the largest mean value of waste tonnes. I have also displayed the statistical information as seen above.
+
+##### Explanation: In the merged data I have grouped by State column and then I summarised the statistical info required using the functions mean, max, min of waste tonnes. Then I arranged it in descending order of mean tonnes to see which state has the highest mean tonnes
+
+## Question 11.
+### Write code to display the most recycled waste Type and the most disposed waste Type with the corresponding year.
+##### Code:
+
+```{r}
+filter_recycling<-merged_data%>%filter(merged_data$Fate == "Recycling")%>%group_by(Type,Year)%>%summarise(sum =sum(Tonnes,na.rm = TRUE),
+            .groups = 'drop')
+
+filter_recycling %>% slice_max(filter_recycling$sum) 
+
+```
+##### Answer: The most recycled waste type with the corresponding years is Bricks, concrete and pavers (2020-2021).
+
+##### Explanation: Here I have first filtered the waste type recycling and grouped by Type & Year and then summarised tottal tonnes and then amongst those I have sliced out the max and which year it was..The same was done with type=disposed.
+
+
+### Type "Disposed"
+
+```{r}
+filter_disposed<-merged_data%>%filter(merged_data$Fate == "Disposal")%>%group_by(Type,Year)%>%summarise(sum =sum(Tonnes,na.rm = TRUE),
+            .groups = 'drop')
+
+filter_disposed %>% slice_max(filter_disposed$sum) 
+
+
+```
+
+##### Answer: The most disposed waste type is Food organics in the year (2008-2009)
+
+
+
+
+
+### Write code to display the most increased waste Type over years.
+##### Code:
+
+```{r}
+df3<-merged_data %>%
+  group_by(Type,Year)%>%summarise(sum =sum(Tonnes,na.rm = TRUE),
+            .groups = 'drop')
+
+```
+
+
+
+```{r}
+growth_rate<-df3%>%group_by(Type)%>%arrange(Year,.by_group = TRUE)%>%mutate(Growth = (sum - lag(sum,na.rm=TRUE))/lag(sum,na.rm=TRUE))%>%
+   mutate(Growth = replace(Growth, is.infinite(Growth), NA))
+
+
+
+```
+
+```{r}
+growth_rate%>%
+  filter(Year != min(Year))%>%
+  group_by(Type)%>%
+  summarise(avg_growth = mean(Growth,na.rm = TRUE))%>%
+  slice_max(order_by = avg_growth)
+```
+
+##### Answer: Displaying the most increased waste type over the years that is Office paper
+
+
+##### Explanation: In the above code after grouping by type and year and summarising the total tonnes I have calculated a year-on-year growth rate for each group, I have also replaced the term where infinity occurs due to previous value becomming 0 as NA and then calculated the avergae growth rate by doing mean of growth rates for each group and then sliced out the max value.
+
+
+
+
+
+## Question 12.
+### Write code to only keep data records where the Category value is Hazardous wastes, the Type value is Tyres (T140) and tonnes value is more than 0
+##### Code:
+
+
+
+
+```{r}
+Category_Hazardous<-merged_data %>% 
+  filter(Category == "Hazardous wastes" & Type == "Tyres (T140)" & Tonnes >0)
+```
+
+```{r}
+print(Category_Hazardous)
+```
+### then write code to add a new column named “Tonnes_range” and fill it with one of the following values based on the corresponding “Tonnes” value as mentioned below:
+1.[0,10000)
+2.[10000,20000)
+3.[20000,40000)
+4.[40000,80000)
+
+```{r}
+Category_Hazardous$Tonnes_range<-ifelse(Category_Hazardous$Tonnes >= 0 & Category_Hazardous$Tonnes < 10000, "[0,10000)", NA)
+
+Category_Hazardous$Tonnes_range<-ifelse(Category_Hazardous$Tonnes >= 10000 & Category_Hazardous$Tonnes < 20000, "[10000,20000)", Category_Hazardous$Tonnes_range)
+
+Category_Hazardous$Tonnes_range<-ifelse(Category_Hazardous$Tonnes >= 20000 & Category_Hazardous$Tonnes < 40000, "[20000,40000)", Category_Hazardous$Tonnes_range)
+
+Category_Hazardous$Tonnes_range<-ifelse(Category_Hazardous$Tonnes >= 40000 & Category_Hazardous$Tonnes < 80000, "[40000,80000)", Category_Hazardous$Tonnes_range)
+
+```
+```{r}
+print(Category_Hazardous)
+```
+### Then, for each state, display a chart to show the number of cases of different score_range values. What do you observe?
+
+
+```{r}
+Count_range<-Category_Hazardous%>%
+  count(State,Tonnes_range)
+
+```
+
+
+```{r}
+  ggplot(Count_range,aes(x = Count_range$Tonnes_range,y = n,fill = State))+geom_col()+geom_text(aes(label = scales::comma(n)), 
+            position = position_stack(vjust = 0.5), 
+            size = 3, color = "white")+
+  theme_bw()+labs(x="Tonnes Range",y="No of cases of different score range",title = "No of cases of different score range across cities")
+```
+
+
+
+##### Answer: ACT,NT & TAS state has the lowest amount of tonnes geneartion amongst all beacuse the no of cases of ACT,NT & Tas's tonnes generation is only in (0,10000) which is the lowest range of tonnes.While generation of tonnes in (40000-80000) range is highest for NSW that means NSW is the state generating most amount of waste materials.
+
+##### Explanation: First I have filtered the data according to our need and then I have created a column named tonnes_range where I placed a value based on the tonnes column as specified in the question by using if else statements and then post that I did a count of state and tonnes range by group to see the count of tonnes range by state and then used ggplot to plot the data.
+
+
+
+
+## Question 13.
+### Write code to draw a chart showing a yearly trend of total waste tonnes of food organics for each state. To draw the chart, please convert the Year-Year formats of all Year values into Year formats. For example, convert 2006-2007 into 2006 and 2020-2021 into 2020. What do you observe from the chart?
+
+##### Code:
+
+```{r}
+merged_foodorganics<-merged_data %>%
+  filter(Type == "Food organics")%>%
+  group_by(State,Year)%>%summarise(sum =sum(Tonnes,na.rm = TRUE), .groups = 'drop')
+
+```
+
+```{r}
+merged_foodorganics$Extracted_Year=substring(merged_foodorganics$Year,1,4)
+merged_foodorganics$Extracted_Year <- as.numeric(merged_foodorganics$Extracted_Year)
+
+merged_foodorganics
+
+
+```
+```{r}
+options(scipen = 999)
+ggplot(merged_foodorganics,aes(x = Extracted_Year,y = sum,color = State))+geom_point()+ geom_smooth(method = "loess")+theme(strip.text.x = element_text(size=8, angle=75),
+          strip.text.y = element_text(size=12, face="bold"),
+          strip.background = element_rect(colour="red", fill="#CCCCFF"))+labs(x="Year",y="Total tonnes",title = "Yearly trend of total waste tonnes of food organics for each state")+scale_x_continuous(breaks = seq(2006, 2022))
+```
+
+
+
+##### Answer: Here we can observe that amongst all states NSW has the highest total tonnes and has also increased the most However, states like NT,Tas,ACT has the lowest waste generation of food organics and have stayed consistent throught the years.VIC state on the other hand has the decreased their food organics waste generation over the years.
+
+##### Explanation: Filtered food organics and have grouped by state and year and then I have summed the total tonnes and then I have added a column named extracted year where I have used substring method to extract 2006 from 2006-2007 based on substring(1,4) counting the letters post that for plotting the data I have converted the year into numeric type. Post that I plotted my graph showing yearly trend of total tonnes of food organics using geom_poin and geom_smooth to see the trend line.
+
+
+
+
+## Question 14.
+### Write code to draw a chart showing a yearly trend of total waste tonnes of C&D. After that, please find a factor affecting the yearly trend of C&D waste on Google or other sources. This factor data also has to be yearly data.
+##### Code:
+
+```{r}
+merged_C_D<-merged_data %>%
+  filter(Stream == "C&D")%>%
+  group_by(Year)%>%summarise(sum =sum(Tonnes,na.rm = TRUE), .groups = 'drop')
+```
+
+```{r}
+merged_C_D$Extracted_Year=substring(merged_C_D$Year,1,4)
+```
+
+```{r}
+options(scipen = 999)
+ggplot(merged_C_D,aes(x = Extracted_Year,y = sum))+ geom_col(fill = "red")+theme(strip.text.x = element_text(size=8, angle=75),
+          strip.text.y = element_text(size=12, face="bold"),
+          strip.background = element_rect(colour="red", fill="#CCCCFF"))+labs(x="Year",y="Total tonnes",title = "Yearly trend of total waste tonnes of C&D")
+
+```
+
+
+
+
+
+##### Answer: Yearly trend of total waste tonnes of C&D have increased over the years but we can also see a slight decrease in 2007,2011 & 2012.
+
+
+##### Explanation:I have again filtered C&D waste and then used group function over year and summarized the total tonnes post that I did extraction of year using substring method as done in the previous question and plotted my graph.
+
+
+
+[With the existing rate of migration and population growth (ABS, 2018b), it is expected that C & D waste generation will continue to grow steadily in the coming years.](https://sbenrc.com.au/app/uploads/2019/10/CIB-WBC-Jun2019-ConstructionDemolitionWasteManagementAustralia.pdf)
+
+
+
+[population growth rate data](https://datacommons.org/tools/timeline#&place=country/AUS&statsVar=Count_Person)
+
+```{r}
+Population_growth_rate = c(20.5,20.8,21.2,21.7,22,22.3,22.7,23.1,23.4,23.8,24.1,24.5,24.9,25.3,25.6)
+merged_C_D_2<-cbind(merged_C_D, Population_growth_rate)
+merged_C_D_2$sum <- merged_C_D_2$sum / 10^6
+print(merged_C_D_2)
+```
+```{r}
+ggp1<-ggplot(merged_C_D_2,aes(x = Extracted_Year,y = sum))+ geom_point(fill = "red")+theme(strip.text.x = element_text(size=8, angle=75),
+          strip.text.y = element_text(size=12, face="bold"),
+          strip.background = element_rect(colour="red", fill="#CCCCFF"))+labs(x="Year",y="Total tonnes (Millions)",title = "Yearly trend of total waste tonnes of C&D vs population growth rate (millions)")
+
+```
+
+
+```{r}
+ggp2<-ggp1+geom_point(aes(x = Extracted_Year, y= merged_C_D_2$Population_growth_rate*max(sum), group = 1),
+            col = "#1b98e0", lwd = 3)+scale_y_continuous(sec.axis = sec_axis(~ . / max(merged_C_D_2$sum)))+scale_color_manual(name = "Variables", values = c("Population growth rate" = "#1b98e0", "Waste tonnes of C&D" = "black"))
+```
+#### Fig1
+
+```{r}
+print(ggp2)
+```
+
+
+
+
+
+
+```{r}
+ggplot(merged_C_D_2, aes(x = Population_growth_rate, y = sum)) + 
+  geom_point() +
+  labs(x = "Population Growth Rate", y = "Total Waste Tonnes of C&D",
+       title = "Relationship between Population Growth and total Waste Tonnes of C&D") +
+  theme_bw()
+```
+
+
+##### Fig 2
+
+
+
+##### Answer: We can see here in fig 2 that in general if we compare the total waste tonnes of C&D yearly and yearly population growth rate it seems that the total tonnes of C&D waste generation has increased over the years with increase in population growth. However there are few years where the C&D waste has decreased despite of increase in population growth as seen in fig1 like the years 2007, 2011, 2012 but since then it has shown a contant increase.
+
+
+##### Explanation: I had C&D waste by year from above plot so to that I added population growth rate for each year using cbin method and also converted the total c&D waste to millions by dividing it with 10^6.Then I created a ggplot for Extracted year and sum of tonnes of C&D using geom_poin to that I added another ggplot of geom_point to see the relation between two points for fig1. For fig 2 I tried to show the relationship between C&D waste and population growth rate from 2006-2020.
+
+## Question 15.
+### Staewise and year wise, core vs non-core waste generation
+##### Code: 
+
+```{r}
+Core_Noncore<-merged_data %>%
+  group_by(`Core_Non-core`,State,Year) %>% 
+  filter(!is.na(`Core_Non-core`)) %>%
+  summarise(total_count=n(),.groups = 'drop') %>%
+  as.data.frame()
+
+head(Core_Noncore,40)
+
+```
+```{r}
+Core_Noncore$Extracted_Year=substring(Core_Noncore$Year,1,4)
+Core_Noncore$Extracted_Year <- as.numeric(Core_Noncore$Extracted_Year)
+```
+
+```{r}
+
+options(scipen = 999)
+ggplot(Core_Noncore,aes(x = Extracted_Year,y = Core_Noncore$total_count,color = State))+geom_point()+geom_smooth(alpha = 0)+ labs(x="Year",y="Total count",title = "Yearly trend of Core & Non-core wastes for each state")+facet_wrap(Core_Noncore$`Core_Non-core` ~ ., ncol=1, scales = "free")
+```
+
+##### Answer: Non-core waste is present only in the state WA. When we look at the graph of core-wastes, Core waste generation have increased in NSW over the years significantly and a significant increase in core waste can also be seen in SA.
+
+##### Explanation: Here I have grouped core, Non-core and state and summarised its count I have also handled NA values when summarising. THen I have extracted the year from 2006-2007 into 2006 in a separate col named extracted year and converted that to numeric too for plotting. post that I plotted a facet wrap graph for core and non-core showing the yearly trend of Core_Non-core waste generation over the years in various Australian states.
+
+
+##### -----------END--------------------------------------
+[References for calculating growth rate in question 11](https://stackoverflow.com/questions/19824601/how-calculate-growth-rate-in-long-format-data-frame)
